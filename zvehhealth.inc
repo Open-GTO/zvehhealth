@@ -17,6 +17,10 @@
 	Defines
 */
 
+#if !defined ZVEHHEALTH_TICKRATE
+	#define ZVEHHEALTH_TICKRATE 300
+#endif
+
 forward OnVehicleHealthChanged(vehicleid, Float:oldhealth, Float:newhealth, bool:scriptcall);
 
 /*
@@ -34,7 +38,7 @@ static
 
 public OnGameModeInit()
 {
-	SetTimer("OccupiedVehicleTimer", 300, 1);
+	SetTimer("OccupiedVehicleTimer", ZVEHHEALTH_TICKRATE, 1);
 
 	#if defined VHealth_OnGameModeInit
 		return VHealth_OnGameModeInit();

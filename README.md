@@ -6,3 +6,8 @@ Vehicle on change health callback
 forward OnVehicleHealthChanged(vehicleid, Float:oldhealth, Float:newhealth, bool:scriptcall);
 ```
 **scriptcall = true** if vehicle health changed by SetVehicleHealth or RepairVehicle functions.
+
+# Provides constants
+```Pawn
+ZVEHHEALTH_TICKRATE 300
+```
