@@ -61,9 +61,7 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	if (newstate == PLAYER_STATE_DRIVER) {
 		Iter_Add(OccupiedVehicle, GetPlayerVehicleID(playerid));
-	}
-
-	if (oldstate == PLAYER_STATE_DRIVER) {
+	} else if (oldstate == PLAYER_STATE_DRIVER) {
 		Iter_Remove(OccupiedVehicle, GetPlayerVehicleID(playerid));
 	}
 
@@ -90,9 +88,13 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 
 stock VHealth_SetVehicleHealth(vehicleid, Float:health)
 {
-	SetVehicleHealth(vehicleid, health);
-	CallHealthCallback(vehicleid, gOldHealth[vehicleid], health, true);
-	return 1;
+	new ret = SetVehicleHealth(vehicleid, health);
+	
+	if (ret == 1) {
+		CallHealthCallback(vehicleid, gOldHealth[vehicleid], health, true);
+	}
+	
+	return ret;
 }
 #if defined _ALS_SetVehicleHealth
 	#undef SetVehicleHealth
@@ -108,9 +110,13 @@ stock VHealth_SetVehicleHealth(vehicleid, Float:health)
 
 stock VHealth_RepairVehicle(vehicleid)
 {
-	RepairVehicle(vehicleid);
-	CallHealthCallback(vehicleid, gOldHealth[vehicleid], 1000.0, true);
-	return 1;
+	new ret = RepairVehicle(vehicleid);
+	
+	if (ret == 1) {
+		CallHealthCallback(vehicleid, gOldHealth[vehicleid], 1000.0, true);
+	}
+
+	return ret;
 }
 #if defined _ALS_RepairVehicle
 	#undef RepairVehicle
@@ -145,7 +151,7 @@ public OccupiedVehicleTimer()
 static stock CallHealthCallback(vehicleid, &Float:oldhealth, Float:newhealth, bool:scriptcall)
 {
 	if (newhealth != oldhealth) {
-		CallRemoteFunction("OnVehicleHealthChanged", "iffi", vehicleid, oldhealth, newhealth, _:scriptcall);
+		CallLocalFunction("OnVehicleHealthChanged", "iffi", vehicleid, oldhealth, newhealth, _:scriptcall);
 		oldhealth = newhealth;
 	}
 }
