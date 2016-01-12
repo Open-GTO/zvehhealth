@@ -1,16 +1,16 @@
 /*
 
-	About: vehicle health callback
+	About: vehicle health changed callback
 	Author: ziggi
 
 */
 
 #if !defined _samp_included
-	#error "Please include a_samp or a_npc before vehhealth"
+	#error "Please include a_samp or a_npc before zvehhealth"
 #endif
 
 #if !defined foreach
-	#error "Please include foreach before vehhealth"
+	#error "Please include foreach before zvehhealth"
 #endif
 
 /*
@@ -28,6 +28,7 @@ forward OnVehicleHealthChanged(vehicleid, Float:oldhealth, Float:newhealth, bool
 */
 
 static
+	gPlayerVehicleID[MAX_PLAYERS] = {INVALID_VEHICLE_ID, ...},
 	Float:gOldHealth[MAX_VEHICLES] = {1000.0, ...},
 	Iterator:OccupiedVehicle<MAX_VEHICLES>;
 
@@ -64,9 +65,13 @@ public OnGameModeInit()
 public OnPlayerStateChange(playerid, newstate, oldstate)
 {
 	if (newstate == PLAYER_STATE_DRIVER) {
-		Iter_Add(OccupiedVehicle, GetPlayerVehicleID(playerid));
-	} else if (oldstate == PLAYER_STATE_DRIVER) {
-		Iter_Remove(OccupiedVehicle, GetPlayerVehicleID(playerid));
+		gPlayerVehicleID[playerid] = GetPlayerVehicleID(playerid);
+		Iter_Add(OccupiedVehicle, gPlayerVehicleID[playerid]);
+	}
+
+	if (oldstate == PLAYER_STATE_DRIVER && gPlayerVehicleID[playerid] != INVALID_VEHICLE_ID) {
+		Iter_Remove(OccupiedVehicle, gPlayerVehicleID[playerid]);
+		gPlayerVehicleID[playerid] = INVALID_VEHICLE_ID;
 	}
 
 	#if defined VHealth_OnPlayerStateChange
@@ -84,6 +89,34 @@ public OnPlayerStateChange(playerid, newstate, oldstate)
 #define OnPlayerStateChange VHealth_OnPlayerStateChange
 #if defined VHealth_OnPlayerStateChange
 	forward VHealth_OnPlayerStateChange(playerid, newstate, oldstate);
+#endif
+
+/*
+	OnPlayerDisconnect
+*/
+
+public OnPlayerDisconnect(playerid, reason)
+{
+	if (gPlayerVehicleID[playerid] != INVALID_VEHICLE_ID) {
+		Iter_Remove(OccupiedVehicle, gPlayerVehicleID[playerid]);
+		gPlayerVehicleID[playerid] = INVALID_VEHICLE_ID;
+	}
+
+	#if defined VHealth_OnPlayerDisconnect
+		return VHealth_OnPlayerDisconnect(playerid, reason);
+	#else
+		return 1;
+	#endif
+}
+#if defined _ALS_OnPlayerDisconnect
+	#undef OnPlayerDisconnect
+#else
+	#define _ALS_OnPlayerDisconnect
+#endif
+ 
+#define OnPlayerDisconnect VHealth_OnPlayerDisconnect
+#if defined VHealth_OnPlayerDisconnect
+	forward VHealth_OnPlayerDisconnect(playerid, reason);
 #endif
 
 /*
@@ -146,7 +179,6 @@ public OccupiedVehicleTimer()
 		CallHealthCallback(vehicleid, gOldHealth[vehicleid], new_health, false);
 	}
 }
-
 
 /*
 	Private functions
