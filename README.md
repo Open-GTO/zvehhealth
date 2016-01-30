@@ -11,3 +11,17 @@ forward OnVehicleHealthChanged(vehicleid, Float:oldhealth, Float:newhealth, bool
 ```Pawn
 ZVEHHEALTH_TICKRATE 300
 ```
+
+# Usage
+```Pawn
+public OnVehicleHealthChanged(vehicleid, Float:oldhealth, Float:newhealth, bool:scriptcall)
+{
+	if (scriptcall) {
+		printf("Vehicle health has been changed (SetVehicleHealth, RepairVehicle).");
+	} else {
+		printf("Vehicle health has been changed (crashed).");
+	}
+
+	printf("Vehicleid: %d. Old: %f, new: %f.", vehicleid, oldhealth, newhealth);
+}
+```
